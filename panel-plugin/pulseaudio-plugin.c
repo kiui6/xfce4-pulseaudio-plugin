@@ -354,9 +354,9 @@ static void
 pulseaudio_plugin_toggle_small (PulseaudioPlugin *pulseaudio_plugin)
 {
   gboolean recording = pulseaudio_volume_get_recording (pulseaudio_plugin->volume);
-  gboolean rec_indicator_persistent = pulseaudio_config_get_rec_indicator_persistent (pulseaudio_plugin->config);
+  guint rec_indicator_show = pulseaudio_config_get_rec_indicator_show (pulseaudio_plugin->config);
 
-  if (recording || rec_indicator_persistent)
+  if (rec_indicator_show != REC_INDICATOR_SHOW_NEVER && (recording || rec_indicator_show == REC_INDICATOR_SHOW_ALWAYS))
   {
     xfce_panel_plugin_set_small (XFCE_PANEL_PLUGIN (pulseaudio_plugin), FALSE);
   }

@@ -100,7 +100,7 @@ struct _PulseaudioButton
   GtkWidget            *recording_indicator;
   GtkCssProvider       *recording_indicator_style_css_provider;
   gboolean              recording;
-  gboolean              recording_indicator_persistent;
+  guint                 recording_indicator_show;
 
   /* Icon size currently used */
   gint                  icon_size;
@@ -145,7 +145,8 @@ static void pulseaudio_set_recording_indicator_state (PulseaudioButton *button)
                                    -1, NULL);
 
   gtk_widget_set_visible (button->recording_indicator,
-                          button->recording || button->recording_indicator_persistent);
+                          button->recording_indicator_show != REC_INDICATOR_SHOW_NEVER && 
+                          (button->recording || button->recording_indicator_show == REC_INDICATOR_SHOW_ALWAYS));
 }
 
 
@@ -542,12 +543,12 @@ static void
 pulseaudio_button_configuration_changed (PulseaudioButton  *button,
                                          PulseaudioConfig  *config)
 {
-  gboolean rec_indicator_persistent = pulseaudio_config_get_rec_indicator_persistent (config);
+  guint    rec_indicator_show = pulseaudio_config_get_rec_indicator_show (config);
   gint     width;
 
-  if (rec_indicator_persistent != button->recording_indicator_persistent)
+  if (rec_indicator_show != button->recording_indicator_show)
     {
-      button->recording_indicator_persistent = rec_indicator_persistent;
+      button->recording_indicator_show = rec_indicator_show;
       pulseaudio_set_recording_indicator_state (button);
 
       if (gtk_orientable_get_orientation (GTK_ORIENTABLE (button->box)) == GTK_ORIENTATION_HORIZONTAL)
@@ -610,7 +611,7 @@ pulseaudio_button_new (PulseaudioPlugin *plugin,
     g_signal_connect_swapped (G_OBJECT (button->config), "configuration-changed",
                               G_CALLBACK (pulseaudio_button_configuration_changed), button);
 
-  button->recording_indicator_persistent = pulseaudio_config_get_rec_indicator_persistent (button->config);
+  button->recording_indicator_show = pulseaudio_config_get_rec_indicator_show (button->config);
   pulseaudio_button_update (button, TRUE);
 
   return button;

@@ -38,6 +38,13 @@ enum
   VOLUME_NOTIFICATIONS_COUNT,
 };
 
+enum
+{
+  REC_INDICATOR_SHOW_NEVER,
+  REC_INDICATOR_SHOW_RECORDING,
+  REC_INDICATOR_SHOW_ALWAYS
+};
+
 PulseaudioConfig  *pulseaudio_config_new                            (const gchar          *property_base);
 
 gboolean           pulseaudio_config_get_enable_keyboard_shortcuts  (PulseaudioConfig     *config);
@@ -47,7 +54,7 @@ guint              pulseaudio_config_get_show_notifications         (PulseaudioC
 #ifdef HAVE_LIBCANBERRA
 gboolean           pulseaudio_config_get_play_sound                 (PulseaudioConfig     *config);
 #endif
-gboolean           pulseaudio_config_get_rec_indicator_persistent   (PulseaudioConfig     *config);
+guint              pulseaudio_config_get_rec_indicator_show         (PulseaudioConfig     *config);
 guint              pulseaudio_config_get_volume_step                (PulseaudioConfig     *config);
 guint              pulseaudio_config_get_volume_max                 (PulseaudioConfig     *config);
 const gchar       *pulseaudio_config_get_mixer_command              (PulseaudioConfig     *config);
