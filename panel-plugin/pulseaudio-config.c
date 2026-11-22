@@ -197,7 +197,8 @@ pulseaudio_config_class_init (PulseaudioConfigClass *klass)
   g_object_class_install_property (gobject_class,
                                    PROP_REC_INDICATOR_SHOW,
                                    g_param_spec_uint ("rec-indicator-show", NULL, NULL,
-                                                         0, 2, DEFAULT_REC_INDICATOR_SHOW,
+                                                         REC_INDICATOR_SHOW_NEVER, REC_INDICATOR_SHOW_ALWAYS, 
+                                                         DEFAULT_REC_INDICATOR_SHOW,
                                                          G_PARAM_READWRITE |
                                                          G_PARAM_STATIC_STRINGS));
 
@@ -1074,9 +1075,22 @@ pulseaudio_config_new (const gchar     *property_base)
       xfconf_g_property_bind (channel, property, G_TYPE_BOOLEAN, config, "play-sound");
       g_free (property);
 #endif
+      
+      property = g_strconcat (property_base, "/rec-indicator-show", NULL);
+      // Migrate legacy record indicator persistent value
+      if(!xfconf_channel_has_property (channel, property))
+        {
+          gchar *legacy_property = g_strconcat (property_base, "/rec-indicator-persistent", NULL);
+          if(xfconf_channel_has_property (channel, legacy_property)) 
+            {
+              gboolean legacy_rec_indicator_persistent = xfconf_channel_get_bool(channel, legacy_property, 0);
+              xfconf_channel_set_uint(channel, property, legacy_rec_indicator_persistent ? REC_INDICATOR_SHOW_ALWAYS : REC_INDICATOR_SHOW_RECORDING);
+            }
+          
+          g_free (legacy_property);
+        }
 
-      property = g_strconcat (property_base, "/rec-indicator-persistent", NULL);
-      xfconf_g_property_bind (channel, property, G_TYPE_BOOLEAN, config, "rec-indicator-persistent");
+      xfconf_g_property_bind (channel, property, G_TYPE_UINT, config, "rec-indicator-show");
       g_free (property);
 
       property = g_strconcat (property_base, "/volume-step", NULL);
